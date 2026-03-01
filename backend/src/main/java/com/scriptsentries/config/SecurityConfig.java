@@ -71,7 +71,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "https://script-sentries1-6xy6.vercel.app"
+                "https://script-sentries1-6xy6.vercel.app",
+                "https://script-clearance.vercel.app/",
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));

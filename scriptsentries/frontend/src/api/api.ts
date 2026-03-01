@@ -3,7 +3,7 @@ import axios from 'axios'
 import type { Script, RiskFlag, RiskUpdatePayload } from '../types'
 
 const api = axios.create({ 
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api' 
+  baseURL: (import.meta.env.VITE_API_BASE_URL as string) || '/api' 
 })
 
 api.interceptors.request.use((config) => {

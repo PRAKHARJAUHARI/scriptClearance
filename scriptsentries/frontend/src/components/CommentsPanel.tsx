@@ -124,6 +124,13 @@ export function CommentsPanel({ riskFlagId, projectId }: Props) {
                 }`}>
                   {comment.author.role.replace(/_/g, ' ')}
                 </span>
+                {comment.type && (
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded border font-medium ${
+                    COMMENT_TYPE_COLORS[comment.type as CommentType] ?? 'bg-gray-100 text-gray-700 border-gray-200'
+                  }`}>
+                    {comment.type}
+                  </span>
+                )}
                 <span className="text-[10px] text-slate-400 ml-auto">{formatTime(comment.createdAt)}</span>
               </div>
               <p className="text-xs text-slate-700 leading-relaxed pl-8">

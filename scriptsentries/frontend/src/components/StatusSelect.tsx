@@ -23,8 +23,9 @@ export const STATUS_OPTIONS: ClearanceStatus[] = [
 
 export function StatusBadge({ status }: { status: ClearanceStatus }) {
   const cfg = STATUS_CONFIG[status]
+  
   return (
-    <span className={`px-3 py-1.5 text-xs font-medium rounded ${cfg.bg} ${cfg.color}`}>
+    <span className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap inline-block ${cfg.bg} ${cfg.color}`}>
       {cfg.label}
     </span>
   )

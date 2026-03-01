@@ -153,7 +153,7 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                       : ''
                   }`}>
                   <td className="py-3 px-4">
-                    <span className="bg-white border border-slate-300 text-slate-900 text-xs font-mono font-semibold px-3 py-1.5 rounded inline-block tracking-wide">
+                    <span className="bg-white border border-slate-300 text-slate-900 text-[10px] font-mono font-semibold px-2 py-1 rounded inline-block tracking-wide whitespace-nowrap">
                       {[
                         `Pg ${risk.pageNumber}`,
                         risk.episodeNumber ? `Ep ${risk.episodeNumber}` : null,

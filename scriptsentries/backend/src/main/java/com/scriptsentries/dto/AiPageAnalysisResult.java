@@ -29,5 +29,7 @@ public class AiPageAnalysisResult {
         private String snippet;
         private String reason;
         private String suggestion;
+        private String episodeNumber;   // Extract from script context
+        private String sceneNumber;     // Extract from script context
     }
 }

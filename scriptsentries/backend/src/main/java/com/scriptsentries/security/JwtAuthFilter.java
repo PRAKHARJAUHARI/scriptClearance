@@ -31,9 +31,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (token != null && jwtUtil.validateToken(token)) {
             String email = jwtUtil.extractEmail(token);
+
+            // 1. Extract the actual role from your JWT token claims
+            String role = "ATTORNEY";   //ay need to implement this in JwtUtil!
+
+            // 2. Format the role for Spring Security
+            // (If you kept .hasRole() in SecurityConfig, it MUST start with "ROLE_")
+            String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+
+            // 3. Assign the correct authority
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(email, null,
-                            List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                            List.of(new SimpleGrantedAuthority(authority)));
+
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 

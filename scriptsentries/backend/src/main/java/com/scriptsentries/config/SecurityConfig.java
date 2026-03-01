@@ -4,6 +4,8 @@ import com.scriptsentries.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,45 +27,32 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    /**
-     * SecurityConfig changes for V2 Project feature.
-     *
-     * MERGE THESE RULES into your existing SecurityConfig filterChain() method.
-     * Place them BEFORE the catch-all .anyRequest().authenticated() line.
-     *
-     * The project-role check (ATTORNEY vs MAIN_PRODUCTION_CONTACT) is enforced
-     * in ProjectService itself because Spring Security only knows about global
-     * UserRole — project membership is a data-layer concern.
-     *
-     * Global UserRole rules being added:
-     *   - POST /api/scripts/{id}/finalize  → ATTORNEY only  (finalise & lock report)
-     *   - GET  /api/projects/**            → authenticated  (all members can view)
-     *   - POST /api/projects/**            → ATTORNEY or ANALYST (create/assign)
-     *   - PATCH /api/projects/scripts/**   → authenticated (service enforces project-role)
-     */
-
-/*
- EXAMPLE — splice into your existing SecurityConfig:
-
-    .requestMatchers(HttpMethod.POST, "/api/scripts/{id}/finalize").hasRole("ATTORNEY")
-    .requestMatchers(HttpMethod.GET,  "/api/projects/**").authenticated()
-    .requestMatchers(HttpMethod.POST, "/api/projects/**").hasAnyRole("ATTORNEY", "ANALYST")
-    .requestMatchers(HttpMethod.PATCH,"/api/projects/**").authenticated()
-
- Your existing lines stay exactly as-is. The above just insert before anyRequest().
-*/
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable) // Required for JWT
+                .cors(Customizer.withDefaults())       // Uses the corsConfigurationSource bean
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 1. Open Endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().permitAll()   // tighten to .authenticated() in production
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight
+
+                        // 2. Project & Script Permissions
+                        // Allow ANY authenticated user to see projects
+                        .requestMatchers(HttpMethod.GET, "/api/projects/**").authenticated()
+
+                        // FIX: Allow MAIN_PRODUCTION_CONTACT (and others) to create projects
+                        // If you use 'hasRole', Spring looks for 'ROLE_ATTORNEY' in the DB
+                        .requestMatchers(HttpMethod.POST, "/api/projects/**").hasAnyRole("ATTORNEY", "ANALYST", "MAIN_PRODUCTION_CONTACT")
+
+                        // Finalizing/Approving a script is strictly for Attorneys
+                        .requestMatchers(HttpMethod.POST, "/api/scripts/*/finalize").hasRole("ATTORNEY")
+
+                        // 3. Fallback
+                        .anyRequest().authenticated()
                 )
+                // Add your JWT filter before the standard Auth filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -77,11 +66,19 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:*"));
+
+        // Use allowedOrigins for explicit control
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://script-sentries1-6xy6.vercel.app"
+        ));
+
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
         config.setExposedHeaders(List.of("Content-Disposition"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L); // Cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

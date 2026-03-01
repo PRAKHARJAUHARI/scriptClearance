@@ -9,7 +9,7 @@ interface Props {
   script: Script
   projects: ProjectResponse[]
   defaultProjectId?: number
-  onComplete: () => void
+  onComplete: (versionName: string, projectId?: number) => void
   onSkip: () => void
 }
 
@@ -18,9 +18,9 @@ const SUGGESTED_LABELS = ['Draft 1', 'Draft 2', 'Revised Draft', "Director's Cut
 export function VersionLabelModal({ script, projects, defaultProjectId, onComplete, onSkip }: Props) {
   const { user } = useAuth()
   const [versionName, setVersionName] = useState('')
-  const [projectId, setProjectId] = useState<number | ''>(defaultProjectId ?? '')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [projectId,   setProjectId]   = useState<number | undefined>(defaultProjectId)
+  const [saving,      setSaving]      = useState(false)
+  const [error,       setError]       = useState<string | null>(null)
 
   const highCount  = script.risks?.filter(r => r.severity === 'HIGH').length ?? 0
   const medCount   = script.risks?.filter(r => r.severity === 'MEDIUM').length ?? 0
@@ -32,15 +32,13 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
     setSaving(true)
     setError(null)
     try {
-      if (projectId) {
-        // assignScriptToProject(scriptId, projectId, versionName, userId)
-        await assignScriptToProject(script.id, Number(projectId), versionName.trim(), user.userId)
+      if (projectId !== undefined) {
+        await assignScriptToProject(script.id, projectId, versionName.trim(), user.userId)
       }
-      onComplete()
+      onComplete(versionName.trim(), projectId)
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error
       setError(msg ?? 'Failed to save version label.')
-      // Don't call onComplete on error — let user retry or skip
     } finally {
       setSaving(false)
     }
@@ -50,14 +48,12 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
     <>
       <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-40" />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl
-                        shadow-xl pointer-events-auto overflow-hidden">
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl pointer-events-auto overflow-hidden">
 
           {/* Header */}
           <div className="p-5 border-b border-slate-100 bg-emerald-50/60">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-200
-                              flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center">
                 <Tag size={15} className="text-emerald-600" />
               </div>
               <div>
@@ -65,8 +61,6 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
                 <p className="text-[11px] text-slate-500">Analysis complete — name this draft before saving</p>
               </div>
             </div>
-
-            {/* Risk summary */}
             <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-200">
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-600 truncate font-medium">{script.filename}</p>
@@ -74,14 +68,12 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
               </div>
               <div className="flex items-center gap-2">
                 {highCount > 0 && (
-                  <span className="flex items-center gap-1 text-[10px] text-red-600 bg-red-50
-                                   border border-red-200 rounded-full px-2 py-0.5 font-medium">
+                  <span className="flex items-center gap-1 text-[10px] text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5 font-medium">
                     <AlertTriangle size={9} /> {highCount} HIGH
                   </span>
                 )}
                 {medCount > 0 && (
-                  <span className="flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50
-                                   border border-amber-200 rounded-full px-2 py-0.5 font-medium">
+                  <span className="flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
                     <AlertCircle size={9} /> {medCount} MED
                   </span>
                 )}
@@ -91,14 +83,12 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
           </div>
 
           <div className="p-5 space-y-4">
-
             {/* Suggested labels */}
             <div>
               <p className="text-[10px] text-slate-400 mb-2 uppercase tracking-widest font-semibold">Quick Labels</p>
               <div className="flex flex-wrap gap-2">
                 {SUGGESTED_LABELS.map(label => (
-                  <button key={label} type="button"
-                    onClick={() => setVersionName(label)}
+                  <button key={label} type="button" onClick={() => setVersionName(label)}
                     className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
                       versionName === label
                         ? 'bg-emerald-600 border-emerald-600 text-white font-medium'
@@ -112,29 +102,25 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
 
             {/* Custom name */}
             <div>
-              <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-widest font-semibold">
-                Version Name *
-              </label>
+              <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-widest font-semibold">Version Name *</label>
               <input type="text" value={versionName} onChange={e => setVersionName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSave()}
                 autoFocus
                 placeholder="e.g. Draft 1, Director's Cut, Final…"
-                className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm
-                           rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400
-                           focus:ring-2 focus:ring-emerald-100 placeholder-slate-300 transition-all" />
+                className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-2.5
+                           focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100
+                           placeholder-slate-300 transition-all" />
             </div>
 
-            {/* Assign to project */}
+            {/* Project selector */}
             {projects.length > 0 && (
               <div>
-                <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-widest font-semibold">
-                  Project
-                </label>
-                <select value={projectId}
-                  onChange={e => setProjectId(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm
-                             rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400
-                             focus:ring-2 focus:ring-emerald-100 transition-all">
+                <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-widest font-semibold">Project</label>
+                <select
+                  value={projectId ?? ''}
+                  onChange={e => setProjectId(e.target.value ? Number(e.target.value) : undefined)}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-4 py-2.5
+                             focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all">
                   <option value="">— No project —</option>
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}{p.studioName ? ` · ${p.studioName}` : ''}</option>
@@ -144,26 +130,19 @@ export function VersionLabelModal({ script, projects, defaultProjectId, onComple
             )}
 
             {error && (
-              <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                {error}
-              </div>
+              <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</div>
             )}
           </div>
 
           {/* Footer */}
           <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center gap-3">
             <button onClick={handleSave} disabled={!versionName.trim() || saving}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-600
-                         hover:bg-emerald-500 text-white text-sm font-medium rounded-xl
-                         transition-all disabled:opacity-40 active:scale-95">
-              {saving
-                ? <><Loader2 size={14} className="animate-spin" /> Saving…</>
-                : <>Save Version <ChevronRight size={14} /></>
-              }
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-500
+                         text-white text-sm font-medium rounded-xl transition-all disabled:opacity-40 active:scale-95">
+              {saving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : <>Save Version <ChevronRight size={14} /></>}
             </button>
             <button onClick={onSkip}
-              className="px-5 py-2.5 bg-white border border-slate-200 text-slate-500
-                         text-sm rounded-xl hover:bg-slate-50 transition-all">
+              className="px-5 py-2.5 bg-white border border-slate-200 text-slate-500 text-sm rounded-xl hover:bg-slate-50 transition-all">
               Skip
             </button>
           </div>

@@ -2,7 +2,10 @@ package com.scriptsentries.controller;
 
 import com.scriptsentries.dto.CollabDto;
 import com.scriptsentries.repository.UserRepository;
+import com.scriptsentries.repository.ProjectRepository;
+import com.scriptsentries.repository.ProjectMemberRepository;
 import com.scriptsentries.service.CommentService;
+import com.scriptsentries.model.Project;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,8 @@ public class CollabController {
 
     private final CommentService commentService;
     private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     // POST /api/collab/comments — save comment + trigger @mention notifications
     @PostMapping("/comments")
@@ -56,18 +61,33 @@ public class CollabController {
     }
 
     // GET /api/collab/users/search?q=steve — autocomplete for @mentions
+    // Optional: projectId to filter to project members only
     @GetMapping("/users/search")
     public ResponseEntity<List<CollabDto.UserSummary>> searchUsers(
-            @RequestParam String q) {
+            @RequestParam String q,
+            @RequestParam(required = false) Long projectId) {
         if (q == null || q.isBlank() || q.length() < 1) {
             return ResponseEntity.ok(List.of());
         }
+        
         List<CollabDto.UserSummary> results = userRepository
                 .searchByUsername(q)
                 .stream()
                 .limit(8)
                 .map(CollabDto.UserSummary::from)
                 .toList();
+        
+        // If projectId provided, filter to only project members
+        if (projectId != null) {
+            Project project = projectRepository.findById(projectId).orElse(null);
+            if (project != null) {
+                results = results.stream()
+                        .filter(user -> projectMemberRepository.existsByProjectAndUser(project, 
+                                userRepository.findById((long) user.getId()).orElse(null)))
+                        .toList();
+            }
+        }
+        
         return ResponseEntity.ok(results);
     }
 }

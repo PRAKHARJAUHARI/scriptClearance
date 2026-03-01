@@ -64,7 +64,7 @@ public class ScriptController {
         Script script = scriptRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Script not found: " + id));
 
-        List<RiskFlagResponse> risks = riskFlagRepository.findByScriptSortedBySeverity(script)
+        List<RiskFlagResponse> risks = riskFlagRepository.findByScriptOrderBySeverityAsc(script)
                 .stream()
                 .map(RiskFlagResponse::from)
                 .toList();
@@ -208,7 +208,7 @@ public class ScriptController {
         Script script = scriptRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Script not found: " + id));
 
-        List<RiskFlag> risks = riskFlagRepository.findByScriptSortedBySeverity(script);
+        List<RiskFlag> risks = riskFlagRepository.findByScriptOrderBySeverityAsc(script);
 
         byte[] excelBytes = excelExportService.generateReport(script, risks);
 

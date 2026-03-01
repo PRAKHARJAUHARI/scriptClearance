@@ -21,6 +21,7 @@ public class ProjectService {
     private final ProjectMemberRepository memberRepo;
     private final UserRepository          userRepo;
     private final ScriptRepository        scriptRepo;
+    private final NotificationRepository  notificationRepo;
 
     // ─────────────────────────────────────────────────────────────────────────
     // CREATE PROJECT
@@ -212,6 +213,18 @@ public class ProjectService {
         ProjectMember member = memberRepo.save(ProjectMember.builder()
                 .project(project).user(newUser)
                 .projectRole(invite.getProjectRole()).build());
+        
+        // Create notification for the new member
+        String message = String.format("%s added you to project '%s'", requester.getUsername(), project.getName());
+        notificationRepo.save(Notification.builder()
+                .recipient(newUser)
+                .message(message)
+                .riskFlag(null)
+                .isRead(false)
+                .build());
+        
+        log.info("@{} added to project '{}', notification sent", newUser.getUsername(), project.getName());
+        
         return ProjectDto.MemberResponse.from(member);
     }
 

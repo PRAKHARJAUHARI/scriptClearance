@@ -7,13 +7,13 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<ClearanceStatus, { label: string; color: string; bg: string }> = {
-  PENDING:                 { label: 'Pending',               color: 'text-slate-400',   bg: 'bg-slate-700/60' },
-  CLEARED:                 { label: 'Cleared',               color: 'text-jade-400',    bg: 'bg-jade-900/40' },
-  NOT_CLEAR:               { label: 'Not Clear',             color: 'text-crimson-400', bg: 'bg-crimson-900/40' },
-  NEGOTIATED_BY_ATTORNEY:  { label: 'Negotiated',            color: 'text-purple-400',  bg: 'bg-purple-900/40' },
-  BRANDED_INTEGRATION:     { label: 'Branded Integration',   color: 'text-blue-400',    bg: 'bg-blue-900/40' },
-  NO_CLEARANCE_NECESSARY:  { label: 'No Clearance Needed',   color: 'text-teal-400',    bg: 'bg-teal-900/40' },
-  PERMISSIBLE:             { label: 'Permissible',           color: 'text-lime-400',    bg: 'bg-lime-900/40' },
+  PENDING:                 { label: 'Pending',               color: 'text-white',       bg: 'bg-yellow-300' },
+  CLEARED:                 { label: 'Cleared',               color: 'text-white',       bg: 'bg-emerald-600' },
+  NOT_CLEAR:               { label: 'Not Clear',             color: 'text-white',       bg: 'bg-red-600' },
+  NEGOTIATED_BY_ATTORNEY:  { label: 'Negotiated',            color: 'text-slate-700',   bg: 'bg-slate-100' },
+  BRANDED_INTEGRATION:     { label: 'Branded Integration',   color: 'text-slate-700',   bg: 'bg-slate-100' },
+  NO_CLEARANCE_NECESSARY:  { label: 'No Clearance Needed',   color: 'text-white',       bg: 'bg-emerald-600' },
+  PERMISSIBLE:             { label: 'Permissible',           color: 'text-white',       bg: 'bg-emerald-600' },
 }
 
 export const STATUS_OPTIONS: ClearanceStatus[] = [
@@ -24,7 +24,7 @@ export const STATUS_OPTIONS: ClearanceStatus[] = [
 export function StatusBadge({ status }: { status: ClearanceStatus }) {
   const cfg = STATUS_CONFIG[status]
   return (
-    <span className={`badge ${cfg.bg} ${cfg.color} border border-current/20`}>
+    <span className={`px-3 py-1.5 text-xs font-medium rounded ${cfg.bg} ${cfg.color}`}>
       {cfg.label}
     </span>
   )

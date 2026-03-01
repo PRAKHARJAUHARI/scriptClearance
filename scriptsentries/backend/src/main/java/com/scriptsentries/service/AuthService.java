@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -53,6 +55,14 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail());
         log.info("User logged in: {}", user.getEmail());
         return buildResponse(user, token);
+    }
+
+    public List<AuthDto.UserSummary> searchUsers(String query) {
+        String searchQuery = "%" + query.toLowerCase() + "%";
+        return userRepository.searchByUsernameOrEmail(searchQuery)
+                .stream()
+                .map(AuthDto.UserSummary::from)
+                .toList();
     }
 
     private AuthDto.AuthResponse buildResponse(User user, String token) {

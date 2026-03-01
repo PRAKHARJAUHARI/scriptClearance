@@ -27,6 +27,8 @@ export interface RiskFlag {
   comments: string | null
   restrictions: string | null
   pageNumber: number
+  episodeNumber: string | null
+  sceneNumber: string | null
   isRedacted: boolean
   createdAt: string
 }

@@ -48,4 +48,24 @@ public class AuthDto {
         private String email;
         private User.UserRole role;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserSummary {
+        private Long id;
+        private String username;
+        private String email;
+        private String role;
+
+        public static UserSummary from(User u) {
+            return UserSummary.builder()
+                    .id(u.getId())
+                    .username(u.getUsername())
+                    .email(u.getEmail())
+                    .role(u.getRole().name())
+                    .build();
+        }
+    }
 }

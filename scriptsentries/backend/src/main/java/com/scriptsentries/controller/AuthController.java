@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -38,6 +39,19 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "error", e.getMessage(),
+                    "timestamp", LocalDateTime.now().toString()
+            ));
+        }
+    }
+
+    @GetMapping("/users/search")
+    public ResponseEntity<?> searchUsers(@RequestParam String q) {
+        try {
+            List<AuthDto.UserSummary> results = authService.searchUsers(q);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "error", "Failed to search users: " + e.getMessage(),
                     "timestamp", LocalDateTime.now().toString()
             ));
         }

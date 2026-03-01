@@ -1,16 +1,15 @@
+// src/components/NotificationBell.tsx
 import { useState, useEffect, useRef } from 'react'
-import { Bell, Check, Loader2, ExternalLink } from 'lucide-react'
+import { Bell, Check, Loader2 } from 'lucide-react'
 import { getNotifications, markAllRead, type NotificationResponse } from '../api/authApi'
 import { useAuth } from '../context/AuthContext'
 
 function formatTime(iso: string) {
-  const d = new Date(iso)
-  const now = new Date()
-  const diff = Math.floor((now.getTime() - d.getTime()) / 1000)
-  if (diff < 60) return 'just now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (diff < 60)    return 'just now'
+  if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return new Date(iso).toLocaleDateString()
 }
 
 interface Props {
@@ -19,9 +18,9 @@ interface Props {
 
 export function NotificationBell({ onNavigateToRisk }: Props) {
   const { user } = useAuth()
-  const [open, setOpen] = useState(false)
+  const [open,          setOpen]          = useState(false)
   const [notifications, setNotifications] = useState<NotificationResponse[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading,       setLoading]       = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
 
   const unread = notifications.filter(n => !n.isRead).length
@@ -30,45 +29,25 @@ export function NotificationBell({ onNavigateToRisk }: Props) {
     if (!user) return
     setLoading(true)
     try {
-      const data = await getNotifications(user.userId)
-      setNotifications(data)
-    } finally {
-      setLoading(false)
-    }
+      setNotifications(await getNotifications(user.userId))
+    } catch { /* ignore */ }
+    finally { setLoading(false) }
   }
 
-  // Load on mount and every 30s
-  useEffect(() => {
-    load()
-    if (!user) return
-    const interval = setInterval(load, 30000)
-    return () => clearInterval(interval)
-  }, [user])
+  // Initial load
+  useEffect(() => { load() }, [user])
 
   // Reload when panel opens
+  useEffect(() => { if (open) load() }, [open])
+
+  // Poll every 30 s
   useEffect(() => {
-    if (open) load()
-  }, [open])
-
-  const handleMarkRead = async () => {
     if (!user) return
-    await markAllRead(user.userId)
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-  }
-
-  // Click a notification — navigate to the risk and close panel
-  const handleNotificationClick = (notification: NotificationResponse) => {
-    if (notification.riskFlagId && onNavigateToRisk) {
-      onNavigateToRisk(notification.riskFlagId)
-    }
-    setOpen(false)
-    // Mark individual as read by marking all (simple approach)
-    if (!notification.isRead) {
-      setNotifications(prev =>
-        prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
-      )
-    }
-  }
+    const id = setInterval(async () => {
+      setNotifications(await getNotifications(user.userId).catch(() => []))
+    }, 30_000)
+    return () => clearInterval(id)
+  }, [user])
 
   // Close on outside click
   useEffect(() => {
@@ -81,117 +60,105 @@ export function NotificationBell({ onNavigateToRisk }: Props) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  const handleMarkRead = async () => {
+    if (!user) return
+    try {
+      await markAllRead(user.userId)
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+    } catch { /* ignore */ }
+  }
+
   if (!user) return null
 
   return (
     <div className="relative" ref={panelRef}>
-      <button onClick={() => setOpen(!open)}
-        className={`relative p-2 rounded-xl transition-colors ${
-          open ? 'bg-white/[0.08]' : 'hover:bg-white/[0.06]'
-        }`}>
-        <Bell size={16} className={unread > 0 ? 'text-jade-400' : 'text-slate-600'} />
+      {/* Bell button */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
+        aria-label="Notifications"
+      >
+        <Bell size={17} className={unread > 0 ? 'text-emerald-600' : 'text-slate-400'} />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 rounded-full
-                           text-[9px] font-bold text-white flex items-center justify-center px-0.5">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full
+                           text-[9px] font-bold text-white flex items-center justify-center
+                           animate-pulse">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
 
+      {/* Panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[340px] bg-[#0a1018] border border-white/[0.1]
-                        rounded-2xl shadow-2xl z-50 overflow-hidden animate-slide-up">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-200
+                        rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <Bell size={13} className="text-jade-500" />
-              <span className="text-sm font-medium text-white">Notifications</span>
+              <Bell size={14} className="text-emerald-600" />
+              <span className="text-sm font-semibold text-slate-800">Notifications</span>
               {unread > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-jade-950/60
-                                 text-jade-400 border border-jade-900/40 font-medium">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50
+                                 text-emerald-700 border border-emerald-200 font-medium">
                   {unread} new
                 </span>
               )}
             </div>
             {unread > 0 && (
-              <button onClick={handleMarkRead}
-                className="flex items-center gap-1 text-[11px] text-slate-600
-                           hover:text-jade-400 transition-colors">
+              <button
+                onClick={handleMarkRead}
+                className="flex items-center gap-1 text-xs text-slate-400
+                           hover:text-emerald-600 transition-colors font-medium"
+              >
                 <Check size={11} /> Mark all read
               </button>
             )}
           </div>
 
           {/* List */}
-          <div className="max-h-[320px] overflow-y-auto">
+          <div className="max-h-72 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center py-10">
-                <Loader2 size={16} className="animate-spin text-slate-700" />
+                <Loader2 size={16} className="animate-spin text-slate-300" />
               </div>
             ) : notifications.length === 0 ? (
-              <div className="text-center py-10">
-                <Bell size={24} className="text-slate-800 mx-auto mb-3" />
-                <p className="text-slate-700 text-sm">No notifications yet</p>
-                <p className="text-slate-800 text-xs mt-1">
-                  You'll be notified when someone @mentions you
-                </p>
+              <div className="text-center py-10 text-slate-400 text-sm">
+                <Bell size={24} className="mx-auto mb-2 text-slate-200" />
+                No notifications yet
               </div>
             ) : (
-              notifications.map(n => {
-                const isClickable = !!n.riskFlagId && !!onNavigateToRisk
-                return (
-                  <button
-                    key={n.id}
-                    onClick={() => handleNotificationClick(n)}
-                    disabled={!isClickable && n.isRead}
-                    className={`w-full text-left px-4 py-3.5 border-b border-white/[0.04]
-                                transition-all duration-150 group
-                                ${!n.isRead ? 'bg-jade-950/15' : ''}
-                                ${isClickable
-                                  ? 'hover:bg-white/[0.04] cursor-pointer'
-                                  : 'cursor-default'
-                                }`}
-                  >
-                    <div className="flex items-start gap-2.5">
-                      {/* Unread dot */}
-                      <div className="flex-shrink-0 mt-1.5">
-                        {!n.isRead
-                          ? <div className="w-1.5 h-1.5 rounded-full bg-jade-500" />
-                          : <div className="w-1.5 h-1.5 rounded-full bg-transparent" />
-                        }
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-xs leading-relaxed ${
-                          !n.isRead ? 'text-slate-300' : 'text-slate-500'
-                        }`}>
-                          {n.message}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-[10px] text-slate-700">{formatTime(n.createdAt)}</span>
-                          {isClickable && (
-                            <span className={`flex items-center gap-1 text-[10px] font-medium
-                                             transition-colors ${
-                                               !n.isRead ? 'text-jade-600' : 'text-slate-700'
-                                             } group-hover:text-jade-400`}>
-                              <ExternalLink size={9} />
-                              View risk
-                            </span>
-                          )}
-                        </div>
-                      </div>
+              notifications.map(n => (
+                <button
+                  key={n.id}
+                  onClick={() => {
+                    if (n.riskFlagId && onNavigateToRisk) onNavigateToRisk(n.riskFlagId)
+                    setOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-3 border-b border-slate-50
+                              hover:bg-slate-50 transition-colors last:border-b-0 ${
+                                !n.isRead ? 'bg-emerald-50/60' : ''
+                              }`}
+                >
+                  <div className="flex items-start gap-2.5">
+                    {/* Unread dot */}
+                    <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
+                      !n.isRead ? 'bg-emerald-500' : 'bg-transparent'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-700 leading-relaxed">{n.message}</p>
+                      <p className="text-[10px] text-slate-400 mt-1">{formatTime(n.createdAt)}</p>
                     </div>
-                  </button>
-                )
-              })
+                  </div>
+                </button>
+              ))
             )}
           </div>
 
           {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-white/[0.05]">
-              <p className="text-[10px] text-slate-800 text-center">
-                Click any notification to jump to that risk
+            <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50">
+              <p className="text-[10px] text-slate-400 text-center">
+                Click a notification to jump to the risk flag
               </p>
             </div>
           )}

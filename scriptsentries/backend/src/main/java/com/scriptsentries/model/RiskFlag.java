@@ -58,6 +58,12 @@ public class RiskFlag {
     @Column(nullable = true)
     private int pageNumber;
 
+    @Column(nullable = true)
+    private String episodeNumber;
+
+    @Column(nullable = true)
+    private String sceneNumber;
+
     /**
      * Security field: when true, sensitive columns are replaced with [REDACTED]
      * in any exported document. Controlled exclusively by attorneys.

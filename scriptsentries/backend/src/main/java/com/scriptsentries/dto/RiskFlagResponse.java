@@ -22,6 +22,8 @@ public class RiskFlagResponse {
     private String comments;
     private String restrictions;
     private int pageNumber;
+    private String episodeNumber;
+    private String sceneNumber;
     private boolean isRedacted;
     private LocalDateTime createdAt;
 
@@ -39,6 +41,8 @@ public class RiskFlagResponse {
                 .comments(f.getComments())
                 .restrictions(f.getRestrictions())
                 .pageNumber(f.getPageNumber())
+                .episodeNumber(f.getEpisodeNumber())
+                .sceneNumber(f.getSceneNumber())
                 .isRedacted(f.isRedacted())
                 .createdAt(f.getCreatedAt())
                 .build();

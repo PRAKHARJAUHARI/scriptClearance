@@ -29,10 +29,9 @@ spring:
       max-request-size: 55MB
 
 
-
   ai:
     openai:
-      api-key: ${GROQ_API_KEY}
+      api-key: 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
       base-url: https://api.groq.com/openai/v1
 
       # 'chat' MUST be indented under 'openai'
@@ -47,7 +46,7 @@ spring:
         multiplier: 2.0
 
   security:
-    api-key: my-secret-sentries-key-123
+    api-key: ScriptSentriesSecretKeyThatIsAtLeast256BitsLongForSecurity!
 
 logging:
   level:

@@ -12,7 +12,7 @@ interface Props {
 
 const SEVERITY_CONFIG: Record<RiskSeverity, { icon: typeof AlertTriangle; color: string; dot: string }> = {
   HIGH:   { icon: AlertTriangle, color: 'text-red-500',    dot: 'bg-red-500'    },
-  MEDIUM: { icon: AlertCircle,   color: 'text-amber-500',  dot: 'bg-amber-500'  },
+  MEDIUM: { icon: AlertCircle,   color: 'text-amber-500',  dot: 'bg-amber-200'  },
   LOW:    { icon: Info,          color: 'text-emerald-600', dot: 'bg-emerald-500' },
 }
 
@@ -39,11 +39,16 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
 
   const categories = Array.from(new Set(risks.map(r => r.category)))
 
-  const filtered = risks.filter(r => {
-    const sevMatch = filter === 'ALL' || r.severity === filter
-    const catMatch = categoryFilter === 'ALL' || r.category === categoryFilter
-    return sevMatch && catMatch
-  })
+  // Sort by severity: HIGH -> MEDIUM -> LOW
+  const severitySortOrder: Record<RiskSeverity, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 }
+
+  const filtered = risks
+    .filter(r => {
+      const sevMatch = filter === 'ALL' || r.severity === filter
+      const catMatch = categoryFilter === 'ALL' || r.category === categoryFilter
+      return sevMatch && catMatch
+    })
+    .sort((a, b) => severitySortOrder[a.severity] - severitySortOrder[b.severity])
 
   const counts = {
     HIGH:   risks.filter(r => r.severity === 'HIGH').length,
@@ -124,11 +129,11 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-16">Page</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-24">Severity</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider">Category</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider">Entity / Item</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider">Status</th>
+              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-16">Episode<br/>Scene Page</th>
+              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-20">Severity</th>
+              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider flex-1">Category</th>
+              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider flex-1">Entity / Item</th>
+              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-20">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -148,29 +153,40 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                       : ''
                   }`}>
                   <td className="py-3 px-4">
-                    <span className="font-mono text-slate-400 text-xs bg-slate-100 px-1.5 py-0.5 rounded">
-                      {risk.pageNumber}
+                    <span className="bg-white border border-slate-300 text-slate-900 text-xs font-mono font-semibold px-3 py-1.5 rounded inline-block tracking-wide">
+                      {[
+                        `Pg ${risk.pageNumber}`,
+                        risk.episodeNumber ? `Ep ${risk.episodeNumber}` : null,
+                        risk.sceneNumber ? `Scene ${risk.sceneNumber}` : null,
+                      ].filter(Boolean).join(' | ')}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className={`flex items-center gap-1.5 ${sev.color} font-semibold text-xs`}>
+                    <span className={`flex items-center gap-1 ${sev.color} font-semibold text-xs whitespace-nowrap`}>
                       <Icon size={13} />
                       {risk.severity}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="text-slate-600 text-xs">
-                      {CATEGORY_LABELS[risk.category] ?? risk.category}
-                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-slate-600 text-xs font-medium truncate">
+                        {CATEGORY_LABELS[risk.category] ?? risk.category}
+                      </span>
+                      {risk.subCategory && (
+                        <span className="text-slate-400 text-[11px] truncate mt-0.5">
+                          {risk.subCategory}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <span className="font-medium text-slate-800 text-sm">
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-slate-800 text-sm truncate">
                         {risk.entityName}
                       </span>
                       {risk.snippet && (
                         <span className="text-slate-400 text-xs truncate max-w-xs mt-0.5">
-                          {risk.snippet.slice(0, 80)}…
+                          {risk.snippet.slice(0, 60)}…
                         </span>
                       )}
                     </div>

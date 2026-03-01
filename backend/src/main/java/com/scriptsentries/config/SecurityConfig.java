@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())       // Uses the corsConfigurationSource bean
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/").permitAll()
                         // 1. Open Endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight

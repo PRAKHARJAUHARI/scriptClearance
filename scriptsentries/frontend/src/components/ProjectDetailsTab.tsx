@@ -1,5 +1,6 @@
 // src/components/ProjectDetailsTab.tsx
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Film, Building2, Mail, Phone, Tag, FileText,
   Calendar, ExternalLink, StickyNote, Pencil, Check, X, Loader2
@@ -102,86 +103,146 @@ export function ProjectDetailsTab({ project, onUpdated }: Props) {
   const fieldProps = { editing, draft, onDraftChange: handleDraftChange }
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6">
 
       {/* Action bar */}
       {userCanEdit && (
-        <div className="flex items-center justify-between">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex items-center justify-between">
           <p className="text-[11px] text-slate-400">
             {editing ? 'Edit production details below' : 'View and edit project production information'}
           </p>
           {editing ? (
-            <div className="flex items-center gap-2">
-              <button onClick={handleSave} disabled={saving}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center gap-2">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSave} disabled={saving}
                 className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500
                            text-white text-xs font-medium rounded-xl transition-all disabled:opacity-50">
                 {saving ? <><Loader2 size={12} className="animate-spin" /> Saving…</> : <><Check size={12} /> Save</>}
-              </button>
-              <button onClick={handleCancel}
+              </motion.button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCancel}
                 className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200
                            text-slate-500 text-xs rounded-xl hover:bg-slate-50 transition-all">
                 <X size={12} /> Cancel
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           ) : (
-            <button onClick={() => setEditing(true)}
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setEditing(true)}
               className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200
                          text-slate-500 text-xs rounded-xl hover:bg-slate-50 transition-all">
               <Pencil size={11} /> Edit Details
-            </button>
+            </motion.button>
           )}
-        </div>
+        </motion.div>
       )}
 
       {error && (
-        <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
           {error}
-        </div>
+        </motion.div>
       )}
 
       {/* Production Info */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
         <h3 className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-2">
           <Film size={11} /> Production Information
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <DetailField icon={<Film size={10} />}         label="Project Name"        value={project.name}            inputKey="name"            {...fieldProps} />
-          <DetailField icon={<Building2 size={10} />}    label="Studio / Production" value={project.studioName}      inputKey="studioName"      {...fieldProps} />
-          <DetailField icon={<Tag size={10} />}          label="Director"            value={project.director}         inputKey="director"        {...fieldProps} />
-          <DetailField icon={<Tag size={10} />}          label="Producer"            value={project.producer}         inputKey="producer"        {...fieldProps} />
-          <DetailField icon={<Tag size={10} />}          label="Genre"               value={project.genre}            inputKey="genre"           {...fieldProps} />
-          <DetailField icon={<Calendar size={10} />}     label="Expected Release"    value={project.expectedRelease}  inputKey="expectedRelease" {...fieldProps} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+            <DetailField icon={<Film size={10} />}         label="Project Name"        value={project.name}            inputKey="name"            {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+            <DetailField icon={<Building2 size={10} />}    label="Studio / Production" value={project.studioName}      inputKey="studioName"      {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+            <DetailField icon={<Tag size={10} />}          label="Director"            value={project.director}         inputKey="director"        {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+            <DetailField icon={<Tag size={10} />}          label="Producer"            value={project.producer}         inputKey="producer"        {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+            <DetailField icon={<Tag size={10} />}          label="Genre"               value={project.genre}            inputKey="genre"           {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}>
+            <DetailField icon={<Calendar size={10} />}     label="Expected Release"    value={project.expectedRelease}  inputKey="expectedRelease" {...fieldProps} />
+          </motion.div>
         </div>
-        <DetailField icon={<FileText size={10} />} label="Logline" value={project.logline} inputKey="logline" {...fieldProps} multiline />
-      </div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <DetailField icon={<FileText size={10} />} label="Logline" value={project.logline} inputKey="logline" {...fieldProps} multiline />
+        </motion.div>
+      </motion.div>
 
       {/* Contact Details */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
         <h3 className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-2">
           <Phone size={11} /> Contact Details
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
-          <DetailField icon={<Mail size={10} />}         label="Production Email" value={project.productionEmail} inputKey="productionEmail" type="email" {...fieldProps} />
-          <DetailField icon={<Phone size={10} />}        label="Production Phone" value={project.productionPhone} inputKey="productionPhone" type="tel"   {...fieldProps} />
-          <DetailField icon={<ExternalLink size={10} />} label="IMDb Link"        value={project.imdbLink}        inputKey="imdbLink"        type="url"   {...fieldProps} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+            <DetailField icon={<Mail size={10} />}         label="Production Email" value={project.productionEmail} inputKey="productionEmail" type="email" {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+            <DetailField icon={<Phone size={10} />}        label="Production Phone" value={project.productionPhone} inputKey="productionPhone" type="tel"   {...fieldProps} />
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+            <DetailField icon={<ExternalLink size={10} />} label="IMDb Link"        value={project.imdbLink}        inputKey="imdbLink"        type="url"   {...fieldProps} />
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Notes */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
         <h3 className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-2">
           <StickyNote size={11} /> Internal Notes
         </h3>
         <DetailField icon={<StickyNote size={10} />} label="Notes" value={project.notes} inputKey="notes" {...fieldProps} multiline />
-      </div>
+      </motion.div>
 
       {/* Meta */}
-      <div className="text-[11px] text-slate-400 border-t border-slate-100 pt-4 flex items-center gap-4 flex-wrap">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="text-[11px] text-slate-400 border-t border-slate-100 pt-4 flex items-center gap-4 flex-wrap">
         <span>Created {new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
         {project.createdBy && <><span>·</span><span>by @{project.createdBy.username}</span></>}
         <span>·</span>
         <span>{project.totalScripts} script{project.totalScripts !== 1 ? 's' : ''}</span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

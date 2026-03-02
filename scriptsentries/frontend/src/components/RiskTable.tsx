@@ -1,5 +1,6 @@
 // src/components/RiskTable.tsx
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { AlertTriangle, AlertCircle, Info, FileWarning } from 'lucide-react'
 import type { RiskFlag, RiskSeverity, RiskCategory } from '../types'
 import { StatusBadge } from './StatusSelect'
@@ -67,11 +68,21 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-slide-up">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="flex flex-col gap-4">
 
       {/* Filter bar */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
+        className="flex items-center gap-2 flex-wrap">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setFilter('ALL')}
           className={`badge border transition-all ${
             filter === 'ALL'
@@ -79,8 +90,10 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
               : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'
           }`}>
           All {risks.length}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setFilter('HIGH')}
           className={`badge transition-all ${
             filter === 'HIGH'
@@ -89,8 +102,10 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
           }`}>
           <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
           High {counts.HIGH}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setFilter('MEDIUM')}
           className={`badge transition-all ${
             filter === 'MEDIUM'
@@ -99,8 +114,10 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
           }`}>
           <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
           Medium {counts.MEDIUM}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setFilter('LOW')}
           className={`badge transition-all ${
             filter === 'LOW'
@@ -109,9 +126,12 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
           }`}>
           <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
           Low {counts.LOW}
-        </button>
+        </motion.button>
 
-        <select
+        <motion.select
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
           value={categoryFilter}
           onChange={e => setCategoryFilter(e.target.value)}
           className="ml-auto bg-white border border-slate-200 text-slate-600
@@ -121,11 +141,15 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
           {categories.map(c => (
             <option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>
           ))}
-        </select>
-      </div>
+        </motion.select>
+      </motion.div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+        className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
@@ -137,17 +161,20 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((risk) => {
+            {filtered.map((risk, i) => {
               const sev      = SEVERITY_CONFIG[risk.severity]
               const Icon     = sev.icon
               const isSelected = risk.id === selectedId
 
               return (
-                <tr
+                <motion.tr
                   key={risk.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 + 0.25, duration: 0.3 }}
                   onClick={() => onSelectRisk(risk)}
-                  className={`border-b border-slate-100 cursor-pointer transition-colors
-                              hover:bg-slate-50 ${
+                  className={`border-b border-slate-100 cursor-pointer transition-colors hover:bg-slate-50
+                              ${
                     isSelected
                       ? 'bg-emerald-50 border-l-2 border-l-emerald-500'
                       : ''
@@ -194,18 +221,22 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                   <td className="py-3 px-4">
                     <StatusBadge status={risk.status} />
                   </td>
-                </tr>
+                </motion.tr>
               )
             })}
           </tbody>
         </table>
 
         {filtered.length === 0 && (
-          <div className="text-center py-12 text-slate-400 text-sm">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center py-12 text-slate-400 text-sm">
             No risks match the current filter
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

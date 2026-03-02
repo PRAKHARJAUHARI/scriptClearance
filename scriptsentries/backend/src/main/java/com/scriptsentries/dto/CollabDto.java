@@ -24,6 +24,8 @@ public class CollabDto {
 
         @NotNull(message = "Author ID is required")
         private Long authorId;
+
+        private String type = "Main";
     }
 
     @Data
@@ -35,6 +37,7 @@ public class CollabDto {
         private String text;
         private UserSummary author;
         private Long riskFlagId;
+        private String type;
         private LocalDateTime createdAt;
 
         public static CommentResponse from(Comment c) {
@@ -43,6 +46,7 @@ public class CollabDto {
                     .text(c.getText())
                     .author(UserSummary.from(c.getAuthor()))
                     .riskFlagId(c.getRiskFlag().getId())
+                    .type(c.getType())
                     .createdAt(c.getCreatedAt())
                     .build();
         }

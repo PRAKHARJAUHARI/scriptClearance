@@ -343,6 +343,7 @@ public class EoExportService {
             setCell(dataRow, 4, r.isRedacted() ? REDACTED : r.getEntityName(),
                     r.isRedacted() ? s.redacted : s.data);
             setCell(dataRow, 5, statusLabel(r.getStatus()),        s.cleared);
+            
             setCell(dataRow, 6, r.getRestrictions(),               s.data);
             setCell(dataRow, 7, r.isRedacted() ? "YES" : "NO",
                     r.isRedacted() ? s.redacted : s.data);

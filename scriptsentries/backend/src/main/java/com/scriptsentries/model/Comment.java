@@ -22,6 +22,10 @@ public class Comment {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
 
+    @Column(nullable = true)
+    @Builder.Default
+    private String type = "Main";
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;

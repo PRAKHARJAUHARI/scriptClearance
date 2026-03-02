@@ -1,5 +1,6 @@
 // src/components/AuthPage.tsx
 import { useState, FormEvent } from 'react'
+import { motion } from 'framer-motion'
 import { ShieldCheck, Mail, Lock, User, Loader2, Scale, Search, Phone, Clapperboard, Eye } from 'lucide-react'
 import { login, register } from '../api/authApi'
 import { useAuth, type ProjectRole } from '../context/AuthContext'
@@ -45,29 +46,51 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="w-full max-w-md">
 
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-8">
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl
                           border border-emerald-300 bg-emerald-50 mb-4">
             <ShieldCheck size={22} className="text-emerald-600" />
-          </div>
+          </motion.div>
           <h1 className="font-display text-2xl text-slate-900">
             Script<span className="text-emerald-600">Sentries</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1">Zero-Retention Script Clearance</p>
-        </div>
+        </motion.div>
 
         {/* Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
 
           {/* Tabs */}
           <div className="flex border-b border-slate-100">
-            {(['login', 'register'] as const).map(t => (
-              <button
+            {(['login', 'register'] as const).map((t, i) => (
+              <motion.button
                 key={t}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+                whileHover={{ backgroundColor: 'rgba(16, 185, 129, 0.05)' }}
                 onClick={() => { setTab(t); setError(null) }}
                 className={`flex-1 py-3.5 text-sm font-medium capitalize transition-colors ${
                   tab === t
@@ -75,16 +98,25 @@ export function AuthPage() {
                     : 'text-slate-400 hover:text-slate-600'
                 }`}>
                 {t === 'login' ? 'Sign In' : 'Register'}
-              </button>
+              </motion.button>
             ))}
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
 
             {tab === 'register' && (
-              <div>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.3 }}
+              >
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">Username</label>
-                <div className="relative">
+                <motion.div 
+                  className="relative"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35 }}
+                >
                   <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text" value={username} onChange={e => setUsername(e.target.value)}
@@ -94,11 +126,15 @@ export function AuthPage() {
                                text-slate-800 text-sm focus:outline-none focus:border-emerald-400
                                focus:ring-2 focus:ring-emerald-100 placeholder-slate-300 transition-all"
                   />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Email</label>
               <div className="relative">
                 <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -111,9 +147,13 @@ export function AuthPage() {
                              focus:ring-2 focus:ring-emerald-100 placeholder-slate-300 transition-all"
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.45 }}
+            >
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Password</label>
               <div className="relative">
                 <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -126,19 +166,28 @@ export function AuthPage() {
                              focus:ring-2 focus:ring-emerald-100 placeholder-slate-300 transition-all"
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Role selector */}
             {tab === 'register' && (
-              <div>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.3 }}
+              >
                 <label className="block text-xs font-medium text-slate-500 mb-2">Your Role</label>
                 <div className="grid gap-2">
-                  {ROLES.map(r => {
+                  {ROLES.map((r, i) => {
                     const IconComp = r.icon
                     const selected = role === r.value
                     return (
-                      <button
+                      <motion.button
                         key={r.value}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 + i * 0.05 }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={() => setRole(r.value)}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left
@@ -157,38 +206,59 @@ export function AuthPage() {
                           <p className="text-[10px] text-slate-400 truncate">{r.desc}</p>
                         </div>
                         {selected && (
-                          <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                            className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" 
+                          />
                         )}
-                      </button>
+                      </motion.button>
                     )
                   })}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {error && (
-              <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <motion.p 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {error}
-              </p>
+              </motion.p>
             )}
 
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary justify-center py-2.5 mt-2">
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 }}
+              whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)' }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-70 
+                         disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 
+                         py-2.5 rounded-xl font-medium transition-all mt-2">
               {loading ? (
                 <><Loader2 size={15} className="animate-spin" /> {tab === 'login' ? 'Signing in…' : 'Creating account…'}</>
               ) : (
                 tab === 'login' ? 'Sign In' : 'Create Account'
               )}
-            </button>
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="text-center text-xs text-slate-400 mt-6">
           Your scripts are never stored. Zero retention, always.
-        </p>
-      </div>
-    </div>
+        </motion.p>
+      </motion.div>
+    </motion.div>
   )
 }

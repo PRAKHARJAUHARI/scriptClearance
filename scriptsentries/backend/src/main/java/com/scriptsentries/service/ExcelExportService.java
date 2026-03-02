@@ -1,7 +1,12 @@
 package com.scriptsentries.service;
 
+import com.scriptsentries.model.Comment;
 import com.scriptsentries.model.RiskFlag;
 import com.scriptsentries.model.Script;
+import com.scriptsentries.model.enums.ClearanceStatus;
+import com.scriptsentries.model.enums.RiskSeverity;
+import com.scriptsentries.repository.CommentRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -12,19 +17,31 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Generates a sanitized Excel clearance report.
  * Rows with isRedacted=true have sensitive columns replaced with [REDACTED].
  */
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class ExcelExportService {
 
     private static final String REDACTED = "[REDACTED]";
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
+    private final CommentRepository commentRepository;
+
     public byte[] generateReport(Script script, List<RiskFlag> risks) throws IOException {
+        // Sort risks: HIGH → MEDIUM → LOW, then by page number
+        List<RiskFlag> sortedRisks = risks.stream()
+                .sorted((a, b) -> {
+                    int severityOrder = getSeverityOrder(b.getSeverity()) - getSeverityOrder(a.getSeverity());
+                    if (severityOrder != 0) return severityOrder;
+                    return Integer.compare(a.getPageNumber(), b.getPageNumber());
+                })
+                .toList();
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet("Clearance Report");
 
@@ -59,7 +76,7 @@ public class ExcelExportService {
             String[] headers = {
                 "Page", "Severity", "Category", "Sub-Category",
                 "Entity Name", "Snippet", "Reason", "Suggestion",
-                "Status", "Comments", "Restrictions", "Redacted"
+                "Status", "Comments (Type : Text)", "Restrictions", "Redacted"
             };
             Row headerRow = sheet.createRow(rowIdx++);
             for (int col = 0; col < headers.length; col++) {
@@ -69,7 +86,7 @@ public class ExcelExportService {
             }
 
             // Data rows
-            for (RiskFlag risk : risks) {
+            for (RiskFlag risk : sortedRisks) {
                 Row row = sheet.createRow(rowIdx++);
 
                 CellStyle severityStyle = switch (risk.getSeverity()) {
@@ -77,6 +94,8 @@ public class ExcelExportService {
                     case MEDIUM -> medStyle;
                     case LOW -> lowStyle;
                 };
+
+                CellStyle statusStyle = createStatusStyle(workbook, risk.getStatus());
 
                 setCell(row, 0, String.valueOf(risk.getPageNumber()), dataStyle);
                 setCell(row, 1, risk.getSeverity().name(), severityStyle);
@@ -89,7 +108,7 @@ public class ExcelExportService {
                     setCell(row, 5, REDACTED, redactedStyle);
                     setCell(row, 6, risk.getReason(), dataStyle);       // reason stays
                     setCell(row, 7, risk.getSuggestion(), dataStyle);   // suggestion stays
-                    setCell(row, 8, risk.getStatus().name(), dataStyle);
+                    setCell(row, 8, risk.getStatus().name(), statusStyle);
                     setCell(row, 9, REDACTED, redactedStyle);
                     setCell(row, 10, REDACTED, redactedStyle);
                     setCell(row, 11, "YES", redactedStyle);
@@ -98,8 +117,8 @@ public class ExcelExportService {
                     setCell(row, 5, risk.getSnippet(), dataStyle);
                     setCell(row, 6, risk.getReason(), dataStyle);
                     setCell(row, 7, risk.getSuggestion(), dataStyle);
-                    setCell(row, 8, risk.getStatus().name(), dataStyle);
-                    setCell(row, 9, risk.getComments(), dataStyle);
+                    setCell(row, 8, risk.getStatus().name(), statusStyle);
+                    setCell(row, 9, formatComments(risk.getId()), dataStyle);
                     setCell(row, 10, risk.getRestrictions(), dataStyle);
                     setCell(row, 11, "NO", dataStyle);
                 }
@@ -181,6 +200,62 @@ public class ExcelExportService {
         style.setVerticalAlignment(VerticalAlignment.TOP);
         style.setBorderBottom(BorderStyle.HAIR);
         style.setBorderRight(BorderStyle.HAIR);
+        return style;
+    }
+
+    private String formatComments(Long riskFlagId) {
+        List<Comment> comments = commentRepository.findByRiskFlagIdOrderByCreatedAtAsc(riskFlagId);
+        if (comments.isEmpty()) return "";
+        
+        return comments.stream()
+                .map(c -> {
+                    String type = c.getType() != null ? c.getType() : "Main";
+                    return type + " : " + c.getText();
+                })
+                .collect(Collectors.joining("\n"));
+    }
+
+    private int getSeverityOrder(RiskSeverity severity) {
+        return switch (severity) {
+            case HIGH -> 3;
+            case MEDIUM -> 2;
+            case LOW -> 1;
+        };
+    }
+
+    private CellStyle createStatusStyle(XSSFWorkbook wb, ClearanceStatus status) {
+        XSSFColor bgColor = switch (status) {
+            case PENDING -> new XSSFColor(new byte[]{(byte)254, (byte)243, (byte)199}, null);           // Amber
+            case CLEARED -> new XSSFColor(new byte[]{(byte)240, (byte)253, (byte)244}, null);          // Green
+            case NOT_CLEAR -> new XSSFColor(new byte[]{(byte)254, (byte)226, (byte)226}, null);       // Red
+            case NEGOTIATED_BY_ATTORNEY -> new XSSFColor(new byte[]{(byte)219, (byte)234, (byte)254}, null); // Blue
+            case BRANDED_INTEGRATION -> new XSSFColor(new byte[]{(byte)240, (byte)253, (byte)244}, null);    // Green
+            case NO_CLEARANCE_NECESSARY -> new XSSFColor(new byte[]{(byte)240, (byte)253, (byte)244}, null); // Green
+            case PERMISSIBLE -> new XSSFColor(new byte[]{(byte)240, (byte)253, (byte)244}, null);            // Green
+        };
+
+        XSSFColor fgColor = switch (status) {
+            case PENDING -> new XSSFColor(new byte[]{(byte)120, (byte)53, (byte)15}, null);                   // Brown
+            case CLEARED -> new XSSFColor(new byte[]{(byte)21, (byte)128, (byte)61}, null);                   // Green
+            case NOT_CLEAR -> new XSSFColor(new byte[]{(byte)185, (byte)28, (byte)28}, null);                 // Red
+            case NEGOTIATED_BY_ATTORNEY -> new XSSFColor(new byte[]{(byte)30, (byte)58, (byte)138}, null);    // Blue
+            case BRANDED_INTEGRATION -> new XSSFColor(new byte[]{(byte)21, (byte)128, (byte)61}, null);       // Green
+            case NO_CLEARANCE_NECESSARY -> new XSSFColor(new byte[]{(byte)21, (byte)128, (byte)61}, null);    // Green
+            case PERMISSIBLE -> new XSSFColor(new byte[]{(byte)21, (byte)128, (byte)61}, null);               // Green
+        };
+
+        XSSFCellStyle style = wb.createCellStyle();
+        style.setFillForegroundColor(bgColor);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setBorderBottom(BorderStyle.HAIR);
+        style.setBorderRight(BorderStyle.HAIR);
+        
+        XSSFFont font = wb.createFont();
+        font.setColor(fgColor);
+        font.setFontHeightInPoints((short)9);
+        font.setBold(false);
+        style.setFont(font);
         return style;
     }
 }

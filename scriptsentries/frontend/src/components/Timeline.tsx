@@ -1,5 +1,6 @@
 // src/components/Timeline.tsx
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import {
   AlertTriangle, AlertCircle, Info, Clock,
   Loader2, Edit3, Check, X, Film, Trash2, User
@@ -82,7 +83,11 @@ function VersionCard({
   }
 
   return (
-    <div className="flex gap-5">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex gap-5">
       {/* Timeline spine */}
       <div className="flex flex-col items-center flex-shrink-0 w-8">
         <div className={`w-3 h-3 rounded-full border-2 border-white ring-1 ring-slate-200 ${dotColor} z-10 mt-1.5 flex-shrink-0`} />
@@ -90,7 +95,8 @@ function VersionCard({
       </div>
 
       {/* Card */}
-      <div 
+      <motion.div 
+        whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)' }}
         onClick={() => !editing && !confirmDel && onOpenScript(entry.scriptId)}
         className={`flex-1 mb-6 p-4 rounded-2xl border transition-all duration-200 bg-white group shadow-sm cursor-pointer ${
         entry.highCount > 0
@@ -114,26 +120,35 @@ function VersionCard({
                   className="flex-1 bg-white border border-emerald-400 text-slate-800 text-sm
                              rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-300"
                 />
-                <button onClick={handleSave} disabled={saving}
+                <motion.button 
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSave} disabled={saving}
                   className="p-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors">
                   {saving
                     ? <Loader2 size={12} className="animate-spin text-white" />
                     : <Check size={12} className="text-white" />}
-                </button>
-                <button onClick={() => { setEditing(false); setDraft(entry.versionName) }}
+                </motion.button>
+                <motion.button 
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { setEditing(false); setDraft(entry.versionName) }}
                   className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
                   <X size={12} className="text-slate-500" />
-                </button>
+                </motion.button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-slate-800 text-sm truncate">{draft}</h3>
                 {userCanEdit && (
-                  <button onClick={(e) => { e.stopPropagation(); setEditing(true) }}
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => { e.stopPropagation(); setEditing(true) }}
                     className="p-1 hover:bg-slate-100 rounded-lg transition-colors
                                opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-600">
                     <Edit3 size={11} />
-                  </button>
+                  </motion.button>
                 )}
               </div>
             )}
@@ -150,19 +165,25 @@ function VersionCard({
             </span>
 
             {userCanDel && !confirmDel && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={(e) => { e.stopPropagation(); setConfirmDel(true) }}
                 className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded-lg
                            transition-all text-slate-300 hover:text-red-500">
                 <Trash2 size={13} />
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
 
         {/* Delete confirmation */}
         {confirmDel && (
-          <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 mb-3">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 mb-3">
             <AlertTriangle size={13} className="text-red-500 flex-shrink-0" />
             <p className="text-xs text-red-600 flex-1">Delete this version permanently?</p>
             <button onClick={(e) => { e.stopPropagation(); handleDelete() }} disabled={deleting}
@@ -174,7 +195,7 @@ function VersionCard({
               className="text-xs text-slate-500 hover:text-slate-700 px-2 py-1 transition-colors">
               Cancel
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* Risk badges */}
@@ -205,8 +226,8 @@ function VersionCard({
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -243,44 +264,63 @@ export function Timeline({ projectId, onOpenScript }: Props) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-14">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center py-14">
         <Loader2 size={18} className="animate-spin text-slate-400" />
-      </div>
+      </motion.div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center py-10 text-red-400 text-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-10 text-red-400 text-sm">
         Failed to load timeline. Check your connection and try again.
-      </div>
+      </motion.div>
     )
   }
 
   if (!timeline || timeline.versions.length === 0) {
     return (
-      <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
         <Film size={32} className="text-slate-300 mx-auto mb-3" />
         <p className="text-slate-500 font-medium text-sm">No script versions yet</p>
         <p className="text-slate-400 text-xs mt-1">
           Click <span className="font-medium text-emerald-600">Upload New Script</span> above to get started
         </p>
-      </div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="space-y-0">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-0">
       {timeline.versions.map((entry, idx) => (
-        <VersionCard
+        <motion.div
           key={entry.scriptId}
-          entry={entry}
-          isLast={idx === timeline.versions.length - 1}
-          onOpenScript={onOpenScript}
-          onRenamed={handleRenamed}
-          onDeleted={handleDeleted}
-        />
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: idx * 0.05, duration: 0.3 }}
+        >
+          <VersionCard
+            entry={entry}
+            isLast={idx === timeline.versions.length - 1}
+            onOpenScript={onOpenScript}
+            onRenamed={handleRenamed}
+            onDeleted={handleDeleted}
+          />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   )
 }

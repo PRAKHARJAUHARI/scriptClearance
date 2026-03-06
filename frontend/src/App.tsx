@@ -75,8 +75,8 @@ function ProjectUploadButton({ projectId, onUploaded }: ProjectUploadButtonProps
   const busy = phase !== 'idle'
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+    <div className="flex flex-col items-end gap-1 w-full sm:w-auto">
+      <label className={`inline-flex items-center justify-center gap-2 px-4 py-2 w-full sm:w-auto rounded-lg text-sm font-medium
                          cursor-pointer select-none border shadow-sm transition-all
                          ${busy
                            ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
@@ -269,55 +269,55 @@ function AppInner() {
 
       {/* ── Navbar ── */}
       <nav className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => { setView('home'); setActiveScript(null); setActiveProject(null); setSelectedRisk(null) }}
-              className="flex items-center gap-2.5">
-              <div className="relative w-8 h-8 rounded-lg border border-emerald-300 bg-emerald-50
-                              flex items-center justify-center">
+              className="flex items-center gap-2 sm:gap-2.5">
+              <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-emerald-300 bg-emerald-50
+                              flex items-center justify-center flex-shrink-0">
                 <ShieldCheck size={15} className="text-emerald-600" />
               </div>
-              <span className="font-display text-lg text-slate-900 tracking-tight">
+              <span className="font-display text-base sm:text-lg text-slate-900 tracking-tight hidden xs:block">
                 Script<span className="text-emerald-600">Sentries</span>
               </span>
             </button>
             {projects.length > 0 && (
               <button
                 onClick={() => { setView('home'); setActiveScript(null); setActiveProject(null) }}
-                className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors">
+                className="hidden md:flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors">
                 <GitBranch size={11} />
                 {projects.length} project{projects.length !== 1 ? 's' : ''}
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full
                             bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px]
                             font-medium uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Zero Retention
             </div>
-            {loading && <Loader2 size={14} className="animate-spin text-slate-400" />}
+            {loading && <Loader2 size={14} className="animate-spin text-slate-400 mx-1" />}
             <button
               onClick={() => setShowGlobalSearch(true)}
               title="Search (Cmd+K)"
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-700">
+              className="p-1.5 sm:p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-700">
               <Search size={14} />
             </button>
             <NotificationBell onNavigateToRisk={handleNavigateToRisk} />
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
-              <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200 ml-1 sm:ml-2">
+              <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0">
                 <User size={12} className="text-slate-400" />
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs font-medium text-slate-700 leading-none">@{user?.username}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{user?.role?.replace(/_/g, ' ')}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[100px]">{user?.role?.replace(/_/g, ' ')}</p>
               </div>
               <button onClick={logout} title="Sign out"
-                className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-700 ml-1">
+                className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-700 sm:ml-1">
                 <LogOut size={13} />
               </button>
             </div>
@@ -325,19 +325,19 @@ function AppInner() {
         </div>
       </nav>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
 
         {/* ══════════════════ HOME VIEW ══════════════════ */}
         {view === 'home' && (
-          <div className="animate-fade-in space-y-10">
+          <div className="animate-fade-in space-y-8 sm:space-y-10">
 
             {/* Hero */}
-            <div className="text-center max-w-2xl mx-auto pt-4">
-              <h1 className="text-slate-900 text-4xl font-display mb-3 leading-tight">
+            <div className="text-center max-w-2xl mx-auto pt-2 sm:pt-4">
+              <h1 className="text-slate-900 text-3xl sm:text-4xl md:text-5xl font-display mb-3 sm:mb-4 leading-tight">
                 Script Clearance,{' '}
                 <span className="text-emerald-600">Zero Footprint</span>
               </h1>
-              <p className="text-slate-500 text-base leading-relaxed">
+              <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
                 AI-powered risk detection for film &amp; TV scripts. Create a project, upload versions,
                 and clear every flag — with guaranteed zero-retention architecture.
               </p>
@@ -345,17 +345,17 @@ function AppInner() {
 
             {/* Projects */}
             <div>
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                   <Film size={13} /> Projects
                 </h2>
-                <button onClick={() => setShowCreateProject(true)} className="btn-primary text-sm py-1.5 px-3">
+                <button onClick={() => setShowCreateProject(true)} className="btn-primary w-full sm:w-auto text-sm py-2 sm:py-1.5 px-3">
                   <Plus size={13} /> New Project
                 </button>
               </div>
 
               {projects.length === 0 ? (
-                <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
+                <div className="text-center py-12 sm:py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white px-4">
                   <Film size={36} className="text-slate-300 mx-auto mb-3" />
                   <p className="text-slate-500 font-medium">No projects yet</p>
                   <p className="text-slate-400 text-sm mt-1 mb-4">Scripts must belong to a project</p>
@@ -364,17 +364,17 @@ function AppInner() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {projects.map(project => (
                     <button key={project.id}
                       onClick={() => { setActiveProject(project); setView('project') }}
-                      className="group text-left p-5 rounded-2xl border border-slate-200 bg-white
+                      className="group text-left p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white
                                  hover:border-emerald-300 hover:shadow-md transition-all duration-200 shadow-sm">
                       <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-100">
+                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-100 flex-shrink-0">
                           <Film size={14} className="text-emerald-600" />
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap">
                           {project.totalScripts} version{project.totalScripts !== 1 ? 's' : ''}
                         </span>
                       </div>
@@ -398,7 +398,7 @@ function AppInner() {
                   ))}
 
                   <button onClick={() => setShowCreateProject(true)}
-                    className="group text-left p-5 rounded-2xl border-2 border-dashed border-slate-200
+                    className="group text-left p-4 sm:p-5 rounded-2xl border-2 border-dashed border-slate-200
                                bg-white hover:border-emerald-300 hover:bg-emerald-50/40 transition-all duration-200">
                     <div className="p-2.5 rounded-xl bg-slate-100 w-fit mb-3 group-hover:bg-emerald-100 transition-colors">
                       <Plus size={14} className="text-slate-500 group-hover:text-emerald-600 transition-colors" />
@@ -415,10 +415,10 @@ function AppInner() {
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="h-px flex-1 bg-slate-200" />
-                  <span className="text-[11px] text-slate-400 uppercase tracking-widest font-medium">Recent Scripts</span>
+                  <span className="text-[11px] text-slate-400 uppercase tracking-widest font-medium whitespace-nowrap">Recent Scripts</span>
                   <div className="h-px flex-1 bg-slate-200" />
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {scripts
                     .slice(0, 6)
                     .map(script => (
@@ -426,22 +426,24 @@ function AppInner() {
                       className="group text-left p-4 rounded-xl border border-slate-200 bg-white
                                  hover:border-emerald-300 hover:shadow-sm transition-all">
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 flex-shrink-0">
                           <FileText size={13} className="text-slate-400 group-hover:text-emerald-600 transition-colors" />
                         </div>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider whitespace-nowrap ${
                           script.status === 'COMPLETE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                           : script.status === 'FAILED' ? 'bg-red-50 text-red-500 border border-red-200'
                           : 'bg-amber-50 text-amber-600 border border-amber-200'
                         }`}>{script.status}</span>
                       </div>
                       <p className="font-medium text-slate-700 text-sm truncate mb-1">{script.filename}</p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] text-slate-400">
                         <span>{script.totalPages}p</span>
                         <span>·</span>
                         <span className="text-red-500">{script.riskCount} risks</span>
-                        <span>·</span>
-                        <Clock size={9} /><span>{formatDate(script.uploadedAt)}</span>
+                        <span className="hidden xs:inline">·</span>
+                        <div className="flex items-center gap-1 w-full xs:w-auto mt-1 xs:mt-0">
+                           <Clock size={9} /><span>{formatDate(script.uploadedAt)}</span>
+                        </div>
                       </div>
                     </button>
                   ))}
@@ -453,29 +455,28 @@ function AppInner() {
 
         {/* ══════════════════ PROJECT VIEW ══════════════════ */}
         {view === 'project' && activeProject && (
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-6 sm:space-y-8 animate-fade-in">
 
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => { setView('home'); setActiveProject(null) }}
                   className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400
-                             hover:text-slate-700 border border-slate-200 bg-white">
+                             hover:text-slate-700 border border-slate-200 bg-white flex-shrink-0 mt-1 sm:mt-0">
                   <ChevronLeft size={17} />
                 </button>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <Film size={14} className="text-emerald-600" />
-                    <h1 className="font-display text-2xl text-slate-900">{activeProject.name}</h1>
+                    <Film size={14} className="text-emerald-600 flex-shrink-0 hidden sm:block" />
+                    <h1 className="font-display text-xl sm:text-2xl text-slate-900 truncate">{activeProject.name}</h1>
                   </div>
                   {activeProject.studioName && (
-                    <p className="text-slate-400 text-sm ml-6">{activeProject.studioName}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm sm:ml-6 truncate">{activeProject.studioName}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* projectId now correctly passed down */}
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <ProjectUploadButton
                   projectId={activeProject.id}
                   onUploaded={handleProjectUploadComplete}
@@ -484,7 +485,7 @@ function AppInner() {
             </div>
 
             {/* Team roster */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[10px] text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <Users size={11} /> Team
@@ -496,7 +497,7 @@ function AppInner() {
                   Manage Team
                 </button>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {activeProject.members.map(m => (
                   <div key={m.id}
                     className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-100 px-3 py-2.5">
@@ -506,9 +507,9 @@ function AppInner() {
                         {m.user.username.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-700 font-medium truncate">@{m.user.username}</p>
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded border font-medium ${
+                    <div className="flex-1 min-w-0 flex flex-col items-start">
+                      <p className="text-xs text-slate-700 font-medium truncate w-full">@{m.user.username}</p>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded border font-medium mt-0.5 whitespace-nowrap ${
                         ROLE_COLORS[m.projectRole] ?? 'text-slate-500 bg-slate-100 border-slate-200'
                       }`}>
                         {m.projectRole.replace(/_/g, ' ')}
@@ -520,7 +521,7 @@ function AppInner() {
             </div>
 
             <div>
-              <h3 className="text-[10px] text-slate-400 uppercase tracking-widest mb-5 flex items-center gap-2">
+              <h3 className="text-[10px] text-slate-400 uppercase tracking-widest mb-4 sm:mb-5 flex items-center gap-2">
                 <ChevronRight size={11} /> Script Versions
               </h3>
               <Timeline
@@ -535,29 +536,29 @@ function AppInner() {
         {/* ══════════════════ WORKBENCH VIEW ══════════════════ */}
         {view === 'workbench' && activeScript && (
           <div className="space-y-6 animate-fade-in">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
                 <button
                   onClick={() => {
                     setView(activeProject ? 'project' : 'home')
                     setActiveScript(null); setSelectedRisk(null)
                   }}
                   className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400
-                             hover:text-slate-700 border border-slate-200 bg-white">
+                             hover:text-slate-700 border border-slate-200 bg-white flex-shrink-0 mt-1 md:mt-0">
                   <ChevronLeft size={17} />
                 </button>
-                <div>
-                  <h1 className="font-display text-2xl text-slate-900 leading-tight">
+                <div className="min-w-0">
+                  <h1 className="font-display text-xl sm:text-2xl text-slate-900 leading-tight truncate">
                     {activeScript.filename.replace('.pdf', '')}
                   </h1>
-                  <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] text-slate-400 mt-1">
                     <span>{activeScript.totalPages} pages</span>
-                    <span>·</span>
+                    <span className="hidden xs:inline">·</span>
                     <span>{risks.length} risks</span>
-                    {highCount > 0 && <><span>·</span><span className="text-red-500 font-medium">{highCount} HIGH</span></>}
+                    {highCount > 0 && <><span className="hidden xs:inline">·</span><span className="text-red-500 font-medium">{highCount} HIGH</span></>}
                     {(activeScript as Script & { versionName?: string }).versionName && (
-                      <><span>·</span>
-                        <span className="text-emerald-600 font-medium">
+                      <><span className="hidden xs:inline">·</span>
+                        <span className="text-emerald-600 font-medium truncate max-w-[150px]">
                           {(activeScript as Script & { versionName?: string }).versionName}
                         </span>
                       </>
@@ -565,14 +566,16 @@ function AppInner() {
                   </div>
                 </div>
               </div>
-              <button onClick={handleExport} disabled={exporting} className="btn-primary">
+              <button onClick={handleExport} disabled={exporting} className="btn-primary w-full md:w-auto justify-center">
                 {exporting
                   ? <><Loader2 size={14} className="animate-spin" /> Exporting…</>
                   : <><Download size={14} /> Export Report</>}
               </button>
             </div>
 
-            <RiskTable risks={risks} onSelectRisk={setSelectedRisk} selectedId={selectedRisk?.id} />
+            <div className="overflow-x-auto pb-4">
+               <RiskTable risks={risks} onSelectRisk={setSelectedRisk} selectedId={selectedRisk?.id} />
+            </div>
           </div>
         )}
       </main>

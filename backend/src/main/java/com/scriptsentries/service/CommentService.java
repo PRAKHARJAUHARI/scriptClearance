@@ -42,6 +42,7 @@ public class CommentService {
 
         Comment comment = Comment.builder()
                 .text(request.getText())
+                .type(request.getType())
                 .author(author)
                 .riskFlag(riskFlag)
                 .build();

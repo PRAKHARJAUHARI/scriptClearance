@@ -24,6 +24,8 @@ public class CollabDto {
 
         @NotNull(message = "Author ID is required")
         private Long authorId;
+
+        private String type;
     }
 
     @Data

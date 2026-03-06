@@ -79,7 +79,7 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.3 }}
-        className="flex items-center gap-2 flex-wrap">
+        className="flex flex-col sm:flex-row items-center gap-2 flex-wrap w-full">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -149,15 +149,15 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.4 }}
-        className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
+        className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto">
+        <table className="min-w-[600px] w-full text-xs sm:text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-16">Episode<br/>Scene Page</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-20">Severity</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider flex-1">Category</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider flex-1">Entity / Item</th>
-              <th className="text-left py-3 px-4 text-slate-500 font-semibold text-xs uppercase tracking-wider w-20">Status</th>
+              <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider w-16">Episode<br/>Scene Page</th>
+              <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider w-20">Severity</th>
+              <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">Category</th>
+              <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">Entity / Item</th>
+              <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider w-20">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -179,7 +179,7 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                       ? 'bg-emerald-50 border-l-2 border-l-emerald-500'
                       : ''
                   }`}>
-                  <td className="py-3 px-4">
+                  <td className="py-2 sm:py-3 px-2 sm:px-4">
                     <span className="bg-white border border-slate-300 text-slate-900 text-[10px] font-mono font-semibold px-2 py-1 rounded inline-block tracking-wide whitespace-nowrap">
                       {[
                         `Pg ${risk.pageNumber}`,
@@ -188,13 +188,13 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                       ].filter(Boolean).join(' | ')}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2 sm:py-3 px-2 sm:px-4">
                     <span className={`flex items-center gap-1 ${sev.color} font-semibold text-xs whitespace-nowrap`}>
                       <Icon size={13} />
                       {risk.severity}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2 sm:py-3 px-2 sm:px-4">
                     <div className="flex flex-col min-w-0">
                       <span className="text-slate-600 text-xs font-medium truncate">
                         {CATEGORY_LABELS[risk.category] ?? risk.category}
@@ -206,7 +206,7 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                       )}
                     </div>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2 sm:py-3 px-2 sm:px-4">
                     <div className="flex flex-col min-w-0">
                       <span className="font-medium text-slate-800 text-sm truncate">
                         {risk.entityName}
@@ -218,7 +218,7 @@ export function RiskTable({ risks, onSelectRisk, selectedId }: Props) {
                       )}
                     </div>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2 sm:py-3 px-2 sm:px-4">
                     <StatusBadge status={risk.status} />
                   </td>
                 </motion.tr>
